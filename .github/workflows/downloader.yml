@@ -173,24 +173,26 @@ jobs:
 
           cd "$TEMP_DIR"
 
-          if [[ "$URL" =~ instagram\.com ]]; then
-            log_info "📸 Instagram detected → forcing best quality"
-            YT_FORMAT="bestvideo+bestaudio/best"
-          else
+          if [[ "$URL" =~ (youtube\.com|youtu\.be|instagram\.com) ]]; then
+            log_info "🎬 YouTube/Instagram detected. Using yt-dlp only (no fallback)."
             YT_FORMAT=$(get_yt_format)
-          fi
-
-          log_info "Attempting download with yt-dlp..."
-          set +e
-          yt-dlp --no-playlist -f "$YT_FORMAT" --restrict-filenames -o "%(title)s.%(ext)s" "$URL"
-          YT_EXIT=$?
-          set -e
-
-          if [[ $YT_EXIT -eq 0 ]]; then
-            log_success "yt-dlp succeeded"
+            if [[ "$URL" =~ instagram\.com ]]; then
+              YT_FORMAT="bestvideo+bestaudio/best"
+            fi
+            yt-dlp --no-playlist -f "$YT_FORMAT" --restrict-filenames -o "%(title)s.%(ext)s" "$URL" || log_error "yt-dlp failed for YouTube/Instagram. Cannot proceed."
+            log_success "Downloaded with yt-dlp"
           else
-            log_warning "yt-dlp failed (exit $YT_EXIT), falling back to curl"
-            curl -LJO --retry 3 --retry-delay 2 --max-time 300 "$URL" || log_error "curl also failed"
+            log_info "🌐 Direct or other link. Trying yt-dlp first..."
+            set +e
+            yt-dlp --no-playlist --restrict-filenames -o "%(title)s.%(ext)s" "$URL"
+            YT_EXIT=$?
+            set -e
+            if [[ $YT_EXIT -eq 0 ]]; then
+              log_success "yt-dlp succeeded"
+            else
+              log_warning "yt-dlp failed (exit $YT_EXIT), falling back to curl"
+              curl -LJO --retry 3 --retry-delay 2 --max-time 300 "$URL" || log_error "curl also failed"
+            fi
           fi
 
           for FILE in *; do
