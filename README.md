@@ -1,10 +1,9 @@
 # 📦 File Downloader – Auto‑download files to your GitHub repo
 
-This repository gives you the ability to download files from **YouTube** (any quality), **Instagram**, and **any direct link**, then saves them into the `bin` folder of your project.
+This repository gives you the ability to download files from **any direct link**, then saves them into the `bin` folder of your project.
 
 ## ✨ Features
 
-- Download from Instagram and YouTube with any quality (1080p, 720p, etc.)
 - Download from any direct link (zip, exe, msi, …)
 - Automatic splitting of large files into multiple parts
 - Optional renaming of downloaded files
